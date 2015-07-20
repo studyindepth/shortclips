@@ -5,4 +5,4 @@
  * @author toandv
  *
  */
-package vn.shortclips.batch;
+package vn.shortclips.infrastructure;
