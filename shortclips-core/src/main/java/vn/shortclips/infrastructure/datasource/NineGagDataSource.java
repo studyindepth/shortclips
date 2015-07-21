@@ -21,15 +21,24 @@ import vn.shortclips.domain.video.entity.Video;
 @Component
 public class NineGagDataSource {
 
-	private static String URL = "http://9gag.com/gif?ref=9nav";
+	private static String BASE_URL = "http://9gag.com";
 
-	private HtmlParser htmlParser = new HtmlParser();
+	private static String GIF_URL = "http://9gag.com/gif";
+
+	private VideoParser videoParser = new VideoParser();
 
 	AsyncHttpClient asyncHttpClient = new AsyncHttpClient(
 			new AsyncHttpClientConfig.Builder().setMaxConnections(10).build());
 
-	public List<Video> downloadVideos() {
-		List<Video> videos = htmlParser.videos();
+	public List<Video> newestVideos() {
+		return downloadVideos(videoParser.newestVideos());
+	}
+
+	public List<Video> nextVideos() {
+		return downloadVideos(videoParser.nextVideos());
+	}
+
+	List<Video> downloadVideos(List<Video> videos) {
 		for (Video video : videos) {
 			asyncHttpClient.prepareGet(video.getMp4Url()).execute(new AsyncVideoHandler(video));
 		}
@@ -37,7 +46,7 @@ public class NineGagDataSource {
 	}
 
 	private final class AsyncVideoHandler extends AsyncCompletionHandler<Response> {
-		private Video video;
+		Video video;
 
 		public AsyncVideoHandler(Video video) {
 			this.video = video;
@@ -55,34 +64,69 @@ public class NineGagDataSource {
 		}
 	}
 
-	static class HtmlParser {
-		private Connection con = Jsoup.connect(URL);
+	private final static class VideoParser {
+		Connection con = Jsoup.connect(BASE_URL);
+		String nextUrl = GIF_URL;
 
-		Document document() {
+		Document document(String url) {
 			try {
-				return con.get();
+				return con.url(url).get();
 			} catch (IOException e) {
 				// TODO : log
 				return null;
 			}
 		}
 
-		public List<Video> videos() {
+		List<Video> videos(String url) {
+			Document doc = document(url);
+			parseNextUrl(doc);
+			return parseVideos(doc);
+		}
+
+		private List<Video> parseVideos(Document doc) {
 			List<Video> result = new ArrayList<>();
-			Document doc = document();
 			if (doc == null) {
 				return result;
 			}
 			Elements articles = doc.select("article");
 			for (Element article : articles) {
-				result.add(video(article));
+				Video video = video(article);
+				if (video != null) {
+					result.add(video);
+				}
 			}
 			return result;
 		}
 
+		private void parseNextUrl(Document doc) {
+			Element loadMore = doc.select("div.loading > a").first();
+			if (loadMore != null) {
+				this.nextUrl = BASE_URL + loadMore.attr("href");
+			}
+		}
+
+		List<Video> newestVideos() {
+			return videos(GIF_URL);
+		}
+
+		List<Video> nextVideos() {
+			return videos(nextUrl);
+		}
+
 		Video video(Element article) {
-			String title = article.select("header > h2 > a").first().html();
-			String mp4Url = article.select("div > a > div > video > source").first().attr("src");
+			Element firstTitle = article.select("header > h2 > a").first();
+			if (firstTitle == null) {
+				return null;
+			}
+			String title = firstTitle.html();
+			Element firstVideo = article.select("div > a > div > video > source").first();
+			if (firstVideo == null) {
+				return null;
+			}
+			String mp4Url = firstVideo.attr("src");
+			if (mp4Url == null || title == null) {
+				return null;
+			}
 			return new Video().setTitle(title).setMp4Url(mp4Url);
 		}
 	}
