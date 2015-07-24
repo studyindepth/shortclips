@@ -17,6 +17,7 @@ import com.ning.http.client.AsyncHttpClientConfig;
 import com.ning.http.client.Response;
 
 import vn.shortclips.domain.video.entity.Video;
+import vn.shortclips.domain.video.factory.VideoIdFactory;
 
 @Component
 public class NineGagDataSource {
@@ -31,16 +32,16 @@ public class NineGagDataSource {
 			new AsyncHttpClientConfig.Builder().setMaxConnections(10).build());
 
 	public List<Video> newestVideos() {
-		return downloadVideos(videoParser.newestVideos());
+		return videoParser.newestVideos();
 	}
 
 	public List<Video> nextVideos() {
-		return downloadVideos(videoParser.nextVideos());
+		return videoParser.nextVideos();
 	}
 
-	List<Video> downloadVideos(List<Video> videos) {
+	public List<Video> downloadVideos(List<Video> videos) {
 		for (Video video : videos) {
-			asyncHttpClient.prepareGet(video.getMp4Url()).execute(new AsyncVideoHandler(video));
+			asyncHttpClient.prepareGet(video.getSourceUrl()).execute(new AsyncVideoHandler(video));
 		}
 		return videos;
 	}
@@ -79,7 +80,7 @@ public class NineGagDataSource {
 
 		List<Video> videos(String url) {
 			Document doc = document(url);
-			parseNextUrl(doc);
+			//parseNextUrl(doc);
 			return parseVideos(doc);
 		}
 
@@ -127,7 +128,7 @@ public class NineGagDataSource {
 			if (mp4Url == null || title == null) {
 				return null;
 			}
-			return new Video().setTitle(title).setMp4Url(mp4Url);
+			return new Video().setId(VideoIdFactory.videoId(mp4Url)).setTitle(title).setSourceUrl(mp4Url);
 		}
 	}
 }

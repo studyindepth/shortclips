@@ -2,15 +2,36 @@ package vn.shortclips.domain.video.entity;
 
 import java.io.InputStream;
 
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Transient;
+
 import vn.shortclips.domain.video.exception.VideoException;
 
+@Entity
 public class Video {
+
+	@Id
+	private String id;
 
 	private String title;
 
-	private String mp4Url;
+	@Column(name = "source_url")
+	private String sourceUrl;
 
+	@Column(name = "youtube_url")
+	private String youtubeUrl;
+
+	@Transient
 	private InputStream inputStream;
+
+	public Video() {
+	}
+
+	public Video(String id) {
+		this.id = id;
+	}
 
 	public String getTitle() {
 		return title;
@@ -21,13 +42,17 @@ public class Video {
 		return this;
 	}
 
-	public String getMp4Url() {
-		return mp4Url;
+	public String getSourceUrl() {
+		return sourceUrl;
 	}
 
-	public Video setMp4Url(String mp4Url) {
-		this.mp4Url = mp4Url;
+	public Video setSourceUrl(String mp4Url) {
+		this.sourceUrl = mp4Url;
 		return this;
+	}
+
+	public String getId() {
+		return id;
 	}
 
 	public InputStream getInputStream() {
@@ -46,4 +71,24 @@ public class Video {
 	public boolean isReady() {
 		return this.inputStream != null;
 	}
+
+	public String getYoutubeUrl() {
+		return youtubeUrl;
+	}
+
+	public Video setYoutubeUrl(String youtubeUrl) {
+		this.youtubeUrl = youtubeUrl;
+		return this;
+	}
+
+	public Video setId(String id) {
+		this.id = id;
+		return this;
+	}
+
+	@Override
+	public String toString() {
+		return "Video [id=" + id + ", title=" + title + ", sourceUrl=" + sourceUrl + ", youtubeUrl=" + youtubeUrl + "]";
+	}
+
 }
