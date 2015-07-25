@@ -48,7 +48,7 @@ public class DataSourceConfiguration {
 		Map<String, String> jpaPropertiesMap = new HashMap<String, String>();
 		System.out.println(env.getProperty("hibernate.dialect"));
 		jpaPropertiesMap.put("hibernate.dialect", env.getProperty("hibernate.dialect"));
-//		jpaPropertiesMap.put("hibernate.hbm2ddl.auto", "create");
+		jpaPropertiesMap.put("hibernate.hbm2ddl.auto", "create");
 		return jpaPropertiesMap;
 	}
 

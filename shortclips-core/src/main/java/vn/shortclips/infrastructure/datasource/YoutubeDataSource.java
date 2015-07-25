@@ -43,10 +43,13 @@ public class YoutubeDataSource {
 		tags.add("clip");
 		snippet.setTags(tags);
 		youtubeVideo.setSnippet(snippet);
+		// youtubeVideo
+		// .setMonetizationDetails(new VideoMonetizationDetails().setAccess(new
+		// AccessPolicy().setAllowed(true)));
 		InputStreamContent mediaContent = new InputStreamContent("video/*", video.getInputStream());
 		try {
-			YouTube.Videos.Insert videoInsert = youtube().videos().insert("snippet,statistics,status", youtubeVideo,
-					mediaContent);
+			YouTube.Videos.Insert videoInsert = youtube().videos().insert("snippet,statistics,status,player",
+					youtubeVideo, mediaContent);
 
 			MediaHttpUploader uploader = videoInsert.getMediaHttpUploader();
 
@@ -85,8 +88,8 @@ public class YoutubeDataSource {
 
 	private YouTube youtube() throws Exception {
 		TokenResponse tokenResponse = new GoogleRefreshTokenRequest(HTTP_TRANSPORT, JSON_FACTORY,
-				"1/8U3YNmpIMkDaDSFremfhfdiR0sEjPjMKOgO_5YuFV5tIgOrJDtdun6zK6XiATCKT",
-				"10244675421-62gmc2ufgedjov3ta90oe64rpcd57ise.apps.googleusercontent.com", "fGRpZpZfyagZppmpyIh1OzoX")
+				"1/tTT8WfVoki47zKY_fDZOS21x1uvb4IV71U5m6rd6_EhIgOrJDtdun6zK6XiATCKT",
+				"478892045894-c0bc3cco6eqghgqt7fe4rbta3qnu3s0h.apps.googleusercontent.com", "5QkAGxSqn4hyMVGYbbgDgggV")
 						.execute();
 		return new YouTube.Builder(HTTP_TRANSPORT, JSON_FACTORY,
 				new GoogleCredential().setAccessToken(tokenResponse.getAccessToken())).setApplicationName("shortclips")

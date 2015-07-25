@@ -5,8 +5,6 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.gs.collections.impl.list.mutable.FastList;
-
 import vn.shortclips.domain.video.entity.Video;
 import vn.shortclips.domain.video.service.VideoService;
 
@@ -18,21 +16,16 @@ public class VideoBatch extends Batch {
 
 	@Override
 	public void run() {
-		List<Video> delay = new FastList<>();
-		List<Video> vidoes = service.downloadNextVideos();
-		try {
-			Thread.sleep(50_000);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-		for (Video video : vidoes) {
-			if (video.isReady()) {
-				service.uploadVideo(video);
-			} else {
-				delay.add(video);
+		while (true) {
+			List<Video> vidoes = service.downloadNextVideos();
+			for (Video video : vidoes) {
+				try {
+					service.uploadVideo(video);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
 			}
 		}
-
 	}
 
 }

@@ -15,11 +15,11 @@ public interface VideoRepository {
 
 	List<Video> notExist(List<Video> videos);
 
-	List<Video> loadNewestShortVideos();
+	List<Video> loadNewestShortenVideos();
 
 	List<Video> loadShortenVideos();
 
 	List<Video> loadFullVideos(List<Video> videos);
 
-	void youtubeUpload(Video video);
+	Video youtubeUpload(Video video);
 }

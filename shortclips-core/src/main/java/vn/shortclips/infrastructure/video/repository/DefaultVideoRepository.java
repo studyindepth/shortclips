@@ -7,6 +7,7 @@ import javax.persistence.PersistenceContext;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.gs.collections.impl.list.mutable.FastList;
 
@@ -28,6 +29,7 @@ public class DefaultVideoRepository implements VideoRepository {
 	YoutubeDataSource youtubeDataSource;
 
 	@Override
+	@Transactional
 	public void save(Video video) {
 		em.persist(video);
 	}
@@ -44,7 +46,7 @@ public class DefaultVideoRepository implements VideoRepository {
 
 	@Override
 	public List<Video> loadShortenVideos() {
-		return nineGagDataSource.newestVideos();
+		return nineGagDataSource.nextVideos();
 	}
 
 	@Override
@@ -53,7 +55,7 @@ public class DefaultVideoRepository implements VideoRepository {
 	}
 
 	@Override
-	public List<Video> loadNewestShortVideos() {
+	public List<Video> loadNewestShortenVideos() {
 		return nineGagDataSource.newestVideos();
 	}
 
@@ -76,8 +78,8 @@ public class DefaultVideoRepository implements VideoRepository {
 	}
 
 	@Override
-	public void youtubeUpload(Video video) {
-		youtubeDataSource.upload(video);
+	public Video youtubeUpload(Video video) {
+		return youtubeDataSource.upload(video);
 	}
 
 }

@@ -25,8 +25,7 @@ public class DefaultVideoService implements VideoService {
 	@Override
 	@Transactional
 	public void uploadVideo(Video video) {
-		videoRepository.youtubeUpload(video);
-		videoRepository.save(video);
+		videoRepository.save(videoRepository.youtubeUpload(video));
 	}
 
 }

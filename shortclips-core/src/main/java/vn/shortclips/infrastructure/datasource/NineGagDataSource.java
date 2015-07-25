@@ -3,6 +3,8 @@ package vn.shortclips.infrastructure.datasource;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
@@ -11,6 +13,7 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.springframework.stereotype.Component;
 
+import com.gs.collections.impl.list.mutable.FastList;
 import com.ning.http.client.AsyncCompletionHandler;
 import com.ning.http.client.AsyncHttpClient;
 import com.ning.http.client.AsyncHttpClientConfig;
@@ -29,7 +32,7 @@ public class NineGagDataSource {
 	private VideoParser videoParser = new VideoParser();
 
 	AsyncHttpClient asyncHttpClient = new AsyncHttpClient(
-			new AsyncHttpClientConfig.Builder().setMaxConnections(10).build());
+			new AsyncHttpClientConfig.Builder().setMaxConnections(1).build());
 
 	public List<Video> newestVideos() {
 		return videoParser.newestVideos();
@@ -39,11 +42,27 @@ public class NineGagDataSource {
 		return videoParser.nextVideos();
 	}
 
-	public List<Video> downloadVideos(List<Video> videos) {
+	public List<Video> downloadVideosAsync(List<Video> videos) {
 		for (Video video : videos) {
 			asyncHttpClient.prepareGet(video.getSourceUrl()).execute(new AsyncVideoHandler(video));
 		}
 		return videos;
+	}
+
+	public List<Video> downloadVideos(List<Video> videos) {
+		List<Video> result = new FastList<>();
+		for (Video video : videos) {
+			Future<Response> f = asyncHttpClient.prepareGet(video.getSourceUrl()).execute();
+			try {
+				video.setInputStream(f.get().getResponseBodyAsStream());
+			} catch (IOException | InterruptedException | ExecutionException e) {
+				e.printStackTrace();
+			}
+			if (video.isReady()) {
+				result.add(video);
+			}
+		}
+		return result;
 	}
 
 	private final class AsyncVideoHandler extends AsyncCompletionHandler<Response> {
@@ -80,7 +99,7 @@ public class NineGagDataSource {
 
 		List<Video> videos(String url) {
 			Document doc = document(url);
-			//parseNextUrl(doc);
+			parseNextUrl(doc);
 			return parseVideos(doc);
 		}
 
@@ -130,5 +149,12 @@ public class NineGagDataSource {
 			}
 			return new Video().setId(VideoIdFactory.videoId(mp4Url)).setTitle(title).setSourceUrl(mp4Url);
 		}
+	}
+
+	public static void main(String[] args) {
+		NineGagDataSource source = new NineGagDataSource();
+		List<Video> v = source.nextVideos();
+		System.out.println(v);
+
 	}
 }
