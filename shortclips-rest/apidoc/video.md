@@ -1,10 +1,9 @@
-**Get videos**
+**Video APIs**
 ----
-  Returns json data about a single user.
 
 * **URL**
 
-  /videos/
+  /v1/videos
 
 * **Method:**
 
@@ -13,40 +12,88 @@
 *  **URL Params**
 
    **Required:**
- 
-   `page=[integer]`
    
+    `apiKey added later`
+
    **Optional:**
-   None
+ 
+   `page=[int]` 
+   
+   `size=[int]`
 
 * **Data Params**
 
-  None
+    `None`
 
 * **Success Response:**
 
-  * **Code:** 200 <br />
-    **Content:** `{ id : 12, name : "Michael Bloom" }`
+    **Code:** 
+    
+    `200 OK`
  
+    **Content:** 
+    
+```
+  {
+    "content": [
+      {
+        "id": "String - video id ",
+        "title": "String",
+        "youtubeUrl": "Video youtube url"
+      },
+      ...
+    ],
+    "last": "boolean - is last page",
+    "first": "boolean - is firt page",
+    "totalPages": "int - total pages",
+    "totalElements": "int - total elements",
+    "number": "int - page number",
+    "size": "int - page size",
+    "numberOfElements": "int - number of elements in this page"
+  }
+```
+
 * **Error Response:**
 
-  * **Code:** 404 NOT FOUND <br />
-    **Content:** `{ error : "User doesn't exist" }`
+    **Code:** 
+    
+    `401 UNAUTHORIZED` 
+ 
+    **Content:** 
 
-  OR
-
-  * **Code:** 401 UNAUTHORIZED <br />
-    **Content:** `{ error : "You are unauthorized to make this request." }`
+    `{ "error" : "UNAUTHORIZED" }`
 
 * **Sample Call:**
 
-  ```javascript
-    $.ajax({
-      url: "/users/1",
-      dataType: "json",
-      type : "GET",
-      success : function(r) {
-        console.log(r);
-      }
-    });
-  ```
+    `GET /v1/videos?page=0&size=3`
+    
+     Code:
+     
+    `200 OK`
+ 
+    Content:
+    
+```
+{
+  "content": [
+    {
+      "id": "a0Y5B8O_460sv.mp4",
+      "title": "Cobra style welding",
+      "youtubeUrl": "http://www.youtube.com/embed/T_2u7vJJf7I"
+    },
+    {
+      "id": "a0Y5ggQ_460sv.mp4",
+      "title": "Nothing is impossible!",
+      "youtubeUrl": "http://www.youtube.com/embed/T_2u7vJJf7I"
+    }
+  ],
+  "last": false,
+  "first": true,
+  "totalPages": 97,
+  "totalElements": 291,
+  "number": 0,
+  "size": 2,
+  "numberOfElements": 2
+}
+```
+
